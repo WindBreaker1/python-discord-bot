@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 import random
 import pyquotegen
+import requests
 
 # load and access the discord token
 load_dotenv()
@@ -66,7 +67,7 @@ async def randomQuoteGen(interaction: discord.Integration):
 # embeds
 
 @client.tree.command(name="embed", description="Embed Demo", guild=guildId)
-async def embedDemo(interaction: discord.Integration):
+async def embedDemo(interaction: discord.Integration, query: str):
   embed = discord.Embed(
     title="Do not Click!",
     url="https://rule34.xxx/", 
@@ -75,10 +76,34 @@ async def embedDemo(interaction: discord.Integration):
     )
   embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
   embed.set_thumbnail(url='https://i.pinimg.com/236x/81/a4/5b/81a45bcf125c0ffb107c617cbd219fab.jpg')
-  embed.add_field(name="The horrors...", value="...of the internet.", inline=False)
+  embed.add_field(name="Title", value=query, inline=False)
   embed.set_image(url='https://i.pinimg.com/236x/58/fe/99/58fe99f7127036ebeb30055bcb87dc59.jpg')
   await interaction.response.send_message(embed=embed)
 
+# anime info slash command
+BASE_URL = "https://api.jikan.moe/v4"
+anime_id = random.randint(1, 20000)
+def get_random_anime():
+  # Generate a random anime ID (arbitrary range, 1 to 20000, as there are many anime in MAL)
+  anime_id = random.randint(1, 15000)
+  try:
+      # Fetch data about the random anime
+      response = requests.get(f"{BASE_URL}/anime/{anime_id}")
+      # Check if the request was successful
+      if response.status_code == 200:
+          data = response.json()  # Parse JSON response
+          title = data["data"]["title"]  # Access the 'title' key
+          url = data["data"]["url"]  # Get the MyAnimeList URL
+          return f"Random Anime: {title}\nMore info: {url}"
+      else:
+          # Handle cases where the ID is invalid
+          return f"Failed to fetch anime with ID {anime_id}. Trying again..."
+  except Exception as e:
+      return f"An error occurred: {e}"
+
+@client.tree.command(name="random-anime", description="Get a random anime.", guild=guildId)
+async def randomAnime(interaction: discord.Integration):
+  await interaction.response.send_message(f'{get_random_anime()}')
 
 
 # running the bot by passing in the functions and intents(permissions)
