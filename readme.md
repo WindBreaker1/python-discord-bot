@@ -4,7 +4,11 @@
 
 ### Embeds!
 
-![embed-test-image](./images/Screenshot%20from%202025-01-18%2013-47-41.png)
+![embed-test-image](./images/embed-test.png)
+
+### Random Anime Generator!
+
+![random-anime-generator](./images/random-anime-test.png)
 
 ## Events
 
