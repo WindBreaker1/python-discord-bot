@@ -29,3 +29,6 @@ Every event type for the discord bot:
 ## Resources
 
 - Video I used for learning: [link](https://youtu.be/CHbN_gB30Tw?si=SAXOYRxdHmqhPtRj);
+- Discord API: [DiscordPy](https://github.com/Rapptz/discord.py)
+- Quotes Generator API: [pyquotegen](https://github.com/Armanidrisi/pyquotegen)
+- Anime API: [Jikan](https://jikan.moe/)
