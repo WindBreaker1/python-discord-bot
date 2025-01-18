@@ -1,5 +1,11 @@
 # Simple Test Discord Bot
 
+## Features
+
+### Embeds!
+
+![embed-test-image](./images/Screenshot%20from%202025-01-18%2013-47-41.png)
+
 ## Events
 
 Every event type for the discord bot:
