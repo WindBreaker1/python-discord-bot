@@ -90,48 +90,47 @@ async def drunkPrinter(interaction: discord.Integration, bet: int):
   emojis = ['❌', '✅']
   matrix = [[random.choice(emojis) for _ in range(cols)] for _ in range(rows)]
   row_strings = []
-  winCon = False
-  winReason = ''
+  row_win = False
+  col_win = False
+  diagonal_win = False
 
   for row in matrix:
     row_string = ' '.join(row)  # Convert row to a string
     row_strings.append(row_string)  # Store the string
     if all(cell == '✅' for cell in row):
-      winCon = True
-      winReason = 'Row'
+      row_win = True
 
   for col_idx in range(cols):
     if all(matrix[row_idx][col_idx] == '✅' for row_idx in range(rows)):
-      winCon = True
-      winReason = 'Column'
-  
-  if matrix[0][0] == matrix[1][1] == matrix[2][2] == '✅':
-    winCon = True
-    winReason = 'Diagonal Right'
+      col_win = True
 
-  if matrix[0][2] == matrix[1][1] == matrix[2][0] == '✅':
-    winCon = True
-    winReason = 'Diagonal Left'
+  if all(matrix[i][i] == '✅' for i in range(rows)):  # Top-left to bottom-right diagonal
+    diagonal_win = True
+  if all(matrix[i][cols - i - 1] == '✅' for i in range(rows)):  # Top-right to bottom-left diagonal
+    diagonal_win = True
 
   full_display = '\n'.join(row_strings)
 
-  if winCon == True:
-    await interaction.response.send_message(f'{full_display}\n\nYou won ${bet}!\n\nReason: {winReason}')
+  if row_win or col_win or diagonal_win:
+    await interaction.response.send_message(f'{full_display}\n\nYou won ${bet}!')
+  elif row_win and col_win or row_win and diagonal_win or col_win and diagonal_win:
+    bet *= 2
+    await interaction.response.send_message(f'{full_display}\n\nYou won ${bet}!')
   else:
     await interaction.response.send_message(f'{full_display}\n\nYou won nothing...')
-    
+
+# get a user's avatar
+
+@client.tree.command(name="user-avatar", description="Gets a user's avatar.", guild=guildId)
+async def getUserAvatar(interaction: discord.Integration, user: discord.User):
+  avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
+  await interaction.response.send_message(f"{user.display_name}'s avatar: {avatar_url}")
 
 
 
-rows = 3
-cols = 3
-emojis = ['❌', '✅']
-matrix = [[random.choice(emojis) for _ in range(cols)] for _ in range(rows)]
 
-for row in matrix:
-  print(' '.join(row))
-  if all(cell == '✅' for cell in row):
-    print('You win')
+
+
 
 
 
