@@ -26,6 +26,11 @@ Every event type for the discord bot:
 - on_reaction_add(reaction, user)
 - on_reaction_remove(reaction, user)
 
+# To-Do
+
+- [ ] Slot machine.
+- [ ] Allow slash commands on every server.
+
 ## Resources
 
 - Video I used for learning: [link](https://youtu.be/CHbN_gB30Tw?si=SAXOYRxdHmqhPtRj);

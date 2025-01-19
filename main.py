@@ -48,16 +48,94 @@ intents.message_content = True
 client = Client(command_prefix="!", intents=intents)
 
 
-# slash commands
+# ======================================= SLASH COMMANDS =================================== #
 
 @client.tree.command(name="drunk", description="I will print drunk text.", guild=guildId)
 async def drunkPrinter(interaction: discord.Integration, query: str):
   await interaction.response.send_message(f'*hic* {query} *hic*')
 
-@client.tree.command(name="d6", description="Rolls a d6.", guild=guildId)
+# dice commands
+
+@client.tree.command(name="coinflip", description="Flips a coin.", guild=guildId)
 async def rollDice(interaction: discord.Integration):
-  roll = random.randint(1,6)
-  await interaction.response.send_message(f'You rolled a 🎲{roll}!')
+  roll = random.randint(1, 2)
+  if roll == 1:
+    await interaction.response.send_message(f'🪙 The coin lands on: Heads!')
+  elif roll == 2:
+    await interaction.response.send_message(f'🪙 The coin lands on: Tails!')
+
+@client.tree.command(name="dice", description="Rolls a dice with however many sides you want.", guild=guildId)
+async def rollDice(interaction: discord.Integration, sides: int):
+  roll = random.randint(1, sides)
+  await interaction.response.send_message(f'🎲 You rolled a {roll}!')
+
+@client.tree.command(name="multiple-dice", description="Rolls a number of dice with however many sides you want.", guild=guildId)
+async def rollDice(interaction: discord.Integration, dice: int, sides: int):
+  countOfDice = 0
+  totalRolls = []
+  totalValue = 0
+  for countOfDice in range(dice):
+    roll = random.randint(1, sides)
+    totalRolls.append(roll)
+    countOfDice += 1
+  for value in totalRolls:
+    totalValue += value
+  await interaction.response.send_message(f'🎲 You rolled: {totalRolls}! \n 🎰 Your total is: {totalValue}!')
+
+# slot machine
+@client.tree.command(name="slot-machine", description="I'm a slot machine.", guild=guildId)
+async def drunkPrinter(interaction: discord.Integration, bet: int):
+  rows = 3
+  cols = 3
+  emojis = ['❌', '✅']
+  matrix = [[random.choice(emojis) for _ in range(cols)] for _ in range(rows)]
+  row_strings = []
+  winCon = False
+  winReason = ''
+
+  for row in matrix:
+    row_string = ' '.join(row)  # Convert row to a string
+    row_strings.append(row_string)  # Store the string
+    if all(cell == '✅' for cell in row):
+      winCon = True
+      winReason = 'Row'
+
+  for col_idx in range(cols):
+    if all(matrix[row_idx][col_idx] == '✅' for row_idx in range(rows)):
+      winCon = True
+      winReason = 'Column'
+  
+  if matrix[0][0] == matrix[1][1] == matrix[2][2] == '✅':
+    winCon = True
+    winReason = 'Diagonal Right'
+
+  if matrix[0][2] == matrix[1][1] == matrix[2][0] == '✅':
+    winCon = True
+    winReason = 'Diagonal Left'
+
+  full_display = '\n'.join(row_strings)
+
+  if winCon == True:
+    await interaction.response.send_message(f'{full_display}\n\nYou won ${bet}!\n\nReason: {winReason}')
+  else:
+    await interaction.response.send_message(f'{full_display}\n\nYou won nothing...')
+    
+
+
+
+rows = 3
+cols = 3
+emojis = ['❌', '✅']
+matrix = [[random.choice(emojis) for _ in range(cols)] for _ in range(rows)]
+
+for row in matrix:
+  print(' '.join(row))
+  if all(cell == '✅' for cell in row):
+    print('You win')
+
+
+
+# random quotes
 
 @client.tree.command(name="random_quote", description="Gives a random motivational quote.", guild=guildId)
 async def randomQuoteGen(interaction: discord.Integration):
@@ -70,8 +148,8 @@ async def randomQuoteGen(interaction: discord.Integration):
 async def embedDemo(interaction: discord.Integration, query: str):
   embed = discord.Embed(
     title="Do not Click!",
-    url="https://rule34.xxx/", 
-    description="❌❌❌", 
+    url="https://rule34.xxx/",
+    description="❌❌❌",
     color=discord.Color.green()
     )
   embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
@@ -82,9 +160,7 @@ async def embedDemo(interaction: discord.Integration, query: str):
 
 # anime info slash command
 BASE_URL = "https://api.jikan.moe/v4"
-anime_id = random.randint(1, 20000)
 def get_random_anime():
-  # Generate a random anime ID (arbitrary range, 1 to 20000, as there are many anime in MAL)
   anime_id = random.randint(1, 15000)
   try:
       # Fetch data about the random anime
