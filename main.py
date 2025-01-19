@@ -119,14 +119,21 @@ async def drunkPrinter(interaction: discord.Integration, bet: int):
   else:
     await interaction.response.send_message(f'{full_display}\n\nYou won nothing...')
 
-# get a user's avatar
+# get a user's avatar & banner
 
 @client.tree.command(name="user-avatar", description="Gets a user's avatar.", guild=guildId)
 async def getUserAvatar(interaction: discord.Integration, user: discord.User):
   avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
-  await interaction.response.send_message(f"{user.display_name}'s avatar: {avatar_url}")
+  await interaction.response.send_message(avatar_url)
 
-
+@client.tree.command(name="user-banner", description="Gets a user's banner.", guild=guildId)
+async def getUserBanner(interaction: discord.Integration, user: discord.User):
+  user = await client.fetch_user(user.id)
+  if user.banner:
+    banner_url = user.banner.url  # Get the banner URL
+    await interaction.response.send_message(banner_url)
+  else:
+    await interaction.response.send_message(f"{user.display_name} does not have a banner set.")
 
 
 
