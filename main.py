@@ -135,12 +135,6 @@ async def getUserBanner(interaction: discord.Integration, user: discord.User):
   else:
     await interaction.response.send_message(f"{user.display_name} does not have a banner set.")
 
-
-
-
-
-
-
 # random quotes
 
 @client.tree.command(name="random_quote", description="Gives a random motivational quote.", guild=guildId)
@@ -148,16 +142,46 @@ async def randomQuoteGen(interaction: discord.Integration):
   quote = pyquotegen.get_quote()
   await interaction.response.send_message(f'{quote}')
 
+# monster codex
+class Creature:
+  def __init__(self, name, description, image):
+    self.name = name
+    self.description = description
+    self.image = image
+
+dragon = Creature("Dragon", "Mystical lizard that breathes fire.", "https://i.pinimg.com/736x/3b/98/1d/3b981d0d8f5b7d92cdee2e668319a1c3.jpg")
+
+rat = Creature("Rat", "A fucking rat", "https://i.pinimg.com/736x/dd/85/3b/dd853b5c3a874aed38b9a04c712809d1.jpg")
+
+creatures = [dragon, rat]
+
+@client.tree.command(name="codex_creature", description="Search the creature codex.", guild=guildId)
+async def codexCreatures(interaction: discord.Integration, query: str):
+  matching_creature = next((creature for creature in creatures if creature.name.lower() == query.lower()), None)
+  if matching_creature:
+    embed = discord.Embed(
+      title = matching_creature.name,
+      description = matching_creature.description,
+      color=discord.Color.green()
+    )
+    embed.set_image(url = matching_creature.image)
+    await interaction.response.send_message(embed=embed)
+  else:
+    await interaction.response.send_message(f'Search something else...')
+
+
+
+
 # embeds
 
 @client.tree.command(name="embed", description="Embed Demo", guild=guildId)
 async def embedDemo(interaction: discord.Integration, query: str):
   embed = discord.Embed(
-    title="Do not Click!",
-    url="https://rule34.xxx/",
-    description="❌❌❌",
-    color=discord.Color.green()
-    )
+    title = "Do not Click!",
+    url = "https://rule34.xxx/",
+    description = "❌❌❌",
+    color = discord.Color.green()
+  )
   embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
   embed.set_thumbnail(url='https://i.pinimg.com/236x/81/a4/5b/81a45bcf125c0ffb107c617cbd219fab.jpg')
   embed.add_field(name="Title", value=query, inline=False)
