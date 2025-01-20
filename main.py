@@ -2,7 +2,8 @@
 
 # to install discord library: <python3 -m pip install -U discord.py>
 import discord
-from discord.ext import commands, app_commands
+from discord.ext import commands
+from discord import app_commands
 # to install dotenv library: <pip install python-dotenv>
 from dotenv import load_dotenv
 import os
@@ -61,11 +62,12 @@ async def drunkPrinter(interaction: discord.Integration, query: str):
 @client.tree.command(name="coinflip", description="Flips a coin.", guild=guildId)
 async def rollDice(interaction: discord.Integration):
   roll = random.randint(1, 2)
-  if roll == 1:
-    await interaction.response.send_message(f'🪙 The coin lands on: Heads!')
-  elif roll == 2:
-    await interaction.response.send_message(f'🪙 The coin lands on: Tails!')
-
+  match roll:
+    case 1:
+      await interaction.response.send_message(f'🪙 The coin lands on: Heads!')
+    case 2:
+      await interaction.response.send_message(f'🪙 The coin lands on: Tails!')
+    
 @client.tree.command(name="dice", description="Rolls a dice with however many sides you want.", guild=guildId)
 async def rollDice(interaction: discord.Integration, sides: int):
   roll = random.randint(1, sides)
@@ -226,6 +228,26 @@ def get_random_anime():
 @client.tree.command(name="random-anime", description="Get a random anime recommendation.", guild=guildId)
 async def randomAnime(interaction: discord.Integration):
   await interaction.response.send_message(f'{get_random_anime()}')
+
+
+
+
+# buttons
+@client.tree.command(name="button", description="Button", guild=guildId)
+async def button(interaction: discord.Integration):
+  view = discord.ui.View()
+  button = discord.ui.Button(label = "👣 Free Fit Pics!", url="https://i.pinimg.com/236x/24/97/c2/2497c290c31e86f3adc15c670480b6c4.jpg")
+  view.add_item(button)
+
+  await interaction.response.send_message(view=view)
+
+
+# fishing
+@client.tree.command(name="fish", description="Start fishing!", guild=guildId)
+async def fish(interaction: discord.Integration):
+  await interaction.response.send_message(f'{get_random_anime()}')
+
+
 
 # ======================================= RUN THE BOT ======================================= #
 

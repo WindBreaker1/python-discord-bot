@@ -1,5 +1,7 @@
 # Simple Test Discord Bot
 
+> Add [Py Discord Bot](https://discord.com/oauth2/authorize?client_id=1330094955343122562&permissions=8&integration_type=0&scope=bot) to your server!
+
 ## Features
 
 ### Embeds!
