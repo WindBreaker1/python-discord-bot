@@ -4,13 +4,17 @@
 
 ## Features
 
-### Embeds!
+### Custom Embeds!
 
 ![embed-test-image](./images/embed-test.png)
 
 ### Random Anime Generator!
 
 ![random-anime-generator](./images/random-anime-test.png)
+
+### Roll Hundreds of Dice!
+
+![dice-test](./images/dice-test.png)
 
 ## Events
 
@@ -31,7 +35,12 @@ Every event type for the discord bot:
 # To-Do
 
 - [ ] Slot machine.
+- [ ] Beer drink minigame.
+- [ ] Fishing minigame.
+- [ ] Check every command to see if it looks good.
+- [ ] Random manga recommendation.
 - [ ] Allow slash commands on every server.
+- [ ] Make a page on your website for the discord bot and link in the projects page.
 
 ## Resources
 
