@@ -1,13 +1,19 @@
+# ========================================= IMPORTS ========================================= #
+
 # to install discord library: <python3 -m pip install -U discord.py>
 import discord
-from discord.ext import commands
-from discord import app_commands
+from discord.ext import commands, app_commands
 # to install dotenv library: <pip install python-dotenv>
 from dotenv import load_dotenv
 import os
+import sys
 import random
 import pyquotegen
 import requests
+# imports from other files
+from codex import creatures
+
+# ====================================== DISCORD BOT INIT ======================================= #
 
 # load and access the discord token
 load_dotenv()
@@ -18,7 +24,6 @@ guildId = discord.Object(id=os.getenv("GUILD_ID"))
 class Client(commands.Bot):
   async def on_ready(self):
     print(f'Logged on as {self.user}!')
-
     try:
       guild = discord.Object(id=1206133484423483453)
       synced = await self.tree.sync(guild=guild)
@@ -38,17 +43,14 @@ class Client(commands.Bot):
        
 
   async def on_reaction_add(self, reaction, user):
-    await reaction.message.channel.send(f'You reacted with {reaction}!')
-
-
+    await reaction.message.channel.send(f'{user} reacted with {reaction}!')
 
 # allowing the bot to access the privilages set by the user
 intents = discord.Intents.default()
 intents.message_content = True
 client = Client(command_prefix="!", intents=intents)
 
-
-# ======================================= SLASH COMMANDS =================================== #
+# ======================================= SLASH COMMANDS ======================================= #
 
 @client.tree.command(name="drunk", description="I will print drunk text.", guild=guildId)
 async def drunkPrinter(interaction: discord.Integration, query: str):
@@ -142,18 +144,24 @@ async def randomQuoteGen(interaction: discord.Integration):
   quote = pyquotegen.get_quote()
   await interaction.response.send_message(f'{quote}')
 
+# 8 ball
+
+@client.tree.command(name="8ball", description="Ask the 8ball a question...", guild=guildId)
+async def askEightBall(interaction: discord.Integration, question: str):
+  
+  responses = ["Yes", "No", "Maybe", "I think so.", "I don't think so.", "You're lying to yourself."]
+  randomNum = random.randint(0, len(responses))
+  finalResponse = responses[randomNum]
+
+  embed = discord.Embed(type='rich')
+  embed.set_image(url="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDJxcjMzODFrOTZtZTh6eG96b29yNmNxaXJtdWwxZ3pmNm5xN2NldSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fkeLNBr7pdr0c/giphy.gif")
+  embed.add_field(name="🎱 Your question", value=question, inline=False)
+  embed.add_field(name="🎱 Your answer", value=finalResponse, inline=False)
+  embed.color = discord.Color.random()
+
+  await interaction.response.send_message(embed=embed)
+
 # monster codex
-class Creature:
-  def __init__(self, name, description, image):
-    self.name = name
-    self.description = description
-    self.image = image
-
-dragon = Creature("Dragon", "Mystical lizard that breathes fire.", "https://i.pinimg.com/736x/3b/98/1d/3b981d0d8f5b7d92cdee2e668319a1c3.jpg")
-
-rat = Creature("Rat", "A fucking rat", "https://i.pinimg.com/736x/dd/85/3b/dd853b5c3a874aed38b9a04c712809d1.jpg")
-
-creatures = [dragon, rat]
 
 @client.tree.command(name="codex_creature", description="Search the creature codex.", guild=guildId)
 async def codexCreatures(interaction: discord.Integration, query: str):
@@ -169,48 +177,57 @@ async def codexCreatures(interaction: discord.Integration, query: str):
   else:
     await interaction.response.send_message(f'Search something else...')
 
+# custom embed
 
-
-
-# embeds
-
-@client.tree.command(name="embed", description="Embed Demo", guild=guildId)
-async def embedDemo(interaction: discord.Integration, query: str):
-  embed = discord.Embed(
-    title = "Do not Click!",
-    url = "https://rule34.xxx/",
-    description = "❌❌❌",
-    color = discord.Color.green()
-  )
+@client.tree.command(name="custom-embed", description="Make your own custom embed!", guild=guildId)
+async def embedDemo(interaction: discord.Integration, 
+  title: str = None,
+  title_url: str = None,
+  description: str = None,
+  hex_color: str = None,
+  thumbnail_url: str = None,
+):
+  if not (title or description or thumbnail_url):
+    await interaction.response.send_message("You didn't provide any inputs!", ephemeral=True)
+    return
+  embed = discord.Embed(type='rich')
+  embed.title = title
+  embed.url = title_url
+  embed.description = description
+  embed.color = discord.Color.from_str(hex_color) if hex_color else discord.Color.random()
   embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar)
-  embed.set_thumbnail(url='https://i.pinimg.com/236x/81/a4/5b/81a45bcf125c0ffb107c617cbd219fab.jpg')
-  embed.add_field(name="Title", value=query, inline=False)
-  embed.set_image(url='https://i.pinimg.com/236x/58/fe/99/58fe99f7127036ebeb30055bcb87dc59.jpg')
+  embed.set_thumbnail(url=thumbnail_url)
+
+  embed.add_field(name=None, value=None, inline=False)
+  embed.set_image(url=None)
+
   await interaction.response.send_message(embed=embed)
 
-# anime info slash command
+# get a random anime recomendation
+
 BASE_URL = "https://api.jikan.moe/v4"
 def get_random_anime():
   anime_id = random.randint(1, 15000)
   try:
-      # Fetch data about the random anime
-      response = requests.get(f"{BASE_URL}/anime/{anime_id}")
-      # Check if the request was successful
-      if response.status_code == 200:
-          data = response.json()  # Parse JSON response
-          title = data["data"]["title"]  # Access the 'title' key
-          url = data["data"]["url"]  # Get the MyAnimeList URL
-          return f"Random Anime: {title}\nMore info: {url}"
-      else:
-          # Handle cases where the ID is invalid
-          return f"Failed to fetch anime with ID {anime_id}. Trying again..."
+    # Fetch data about the random anime
+    response = requests.get(f"{BASE_URL}/anime/{anime_id}")
+    # Check if the request was successful
+    if response.status_code == 200:
+      data = response.json()  # Parse JSON response
+      title = data["data"]["title"]  # Access the 'title' key
+      url = data["data"]["url"]  # Get the MyAnimeList URL
+      return f"Random Anime: {title}\nMore info: {url}"
+    else:
+      # Handle cases where the ID is invalid
+      return f"Failed to fetch anime with ID {anime_id}. Try again."
   except Exception as e:
-      return f"An error occurred: {e}"
+    return f"An error occurred: {e}"
 
-@client.tree.command(name="random-anime", description="Get a random anime.", guild=guildId)
+@client.tree.command(name="random-anime", description="Get a random anime recommendation.", guild=guildId)
 async def randomAnime(interaction: discord.Integration):
   await interaction.response.send_message(f'{get_random_anime()}')
 
+# ======================================= RUN THE BOT ======================================= #
 
 # running the bot by passing in the functions and intents(permissions)
 client.run(token)
