@@ -52,6 +52,25 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = Client(command_prefix="!", intents=intents)
 
+# ================================== LOAD AND SAVE JSON DATA =================================== #
+
+DATA_FILE = "data.json"
+
+def load_data(key, default_value=None):
+  if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r") as f:
+      return json.load(f).get(key, default_value)
+  return default_value
+
+def save_data(key, value):
+  data = {}
+  if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r") as f:
+      data = json.load(f)
+  data[key] = value
+  with open(DATA_FILE, "w") as f:
+    json.dump(data, f, indent=2)
+
 # ============================================================================================== #
 # ======================================= SLASH COMMANDS ======================================= #
 # ============================================================================================== #
@@ -254,35 +273,23 @@ async def simpleSlotMachine(interaction: discord.Integration, bet: int):
   else:
     await interaction.response.send_message(f'{full_display}\n\nYou won nothing...')
 
-# ============================================================================================== #
-# ======================================== TEST COMMANDS ======================================= #
-# ============================================================================================== #
-
-DATA_FILE = "data.json"
-
-def load_data(key, default_value=None):
-  if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "r") as f:
-      return json.load(f).get(key, default_value)
-  return default_value
-
-def save_data(key, value):
-  data = {}
-  if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "r") as f:
-      data = json.load(f)
-  data[key] = value
-  with open(DATA_FILE, "w") as f:
-    json.dump(data, f, indent=2)
+# ======================================= TOTAL CLICKS ======================================= #
 
 counter = load_data("counter", 0)
-
-@client.tree.command(name="click-button", description="Test an incremental button.", guild=guildId)
-async def incrementButton(interaction: discord.Integration):
+@client.tree.command(name="click", description="Increment a counter by 1, which is saved for all users.", guild=guildId)
+async def incrementCounter(interaction: discord.Integration):
   global counter
   counter += 1
   save_data("counter", counter)
   await interaction.response.send_message(f"The counter is now: {counter}!")
+
+# ============================================================================================== #
+# ======================================== TEST COMMANDS ======================================= #
+# ============================================================================================== #
+
+
+
+
 
 
 
@@ -316,44 +323,6 @@ async def drinkBeer(interaction: discord.Integration):
 
   if finalAmount >= 5:
     await interaction.response.send_message(f'🍺 You drank {finalAmount} beers!')
-
-
-
-
-
-
-
-# monster codex
-
-# the codex
-class Creature:
-  def __init__(self, name, description, image):
-    self.name = name
-    self.description = description
-    self.image = image
-
-dragon = Creature("Dragon", "Mystical lizard that breathes fire.", "https://i.pinimg.com/736x/3b/98/1d/3b981d0d8f5b7d92cdee2e668319a1c3.jpg")
-
-rat = Creature("Rat", "A fucking rat", "https://i.pinimg.com/736x/dd/85/3b/dd853b5c3a874aed38b9a04c712809d1.jpg")
-
-horror = Creature("Two-Legged Horror", "Unkown creature residing in the void. Will stop at nothing to consume you.", "https://i.pinimg.com/236x/ed/e2/79/ede279c0ce89f1bee52aafcaac28de83.jpg")
-
-creatures = [dragon, rat, horror]
-
-@client.tree.command(name="codex_creature", description="Search the creature codex.", guild=guildId)
-async def codexCreatures(interaction: discord.Integration, query: str):
-  matching_creature = next((creature for creature in creatures if creature.name.lower() == query.lower()), None)
-  if matching_creature:
-    embed = discord.Embed(
-      title = matching_creature.name,
-      description = matching_creature.description,
-      color=discord.Color.green()
-    )
-    embed.set_image(url = matching_creature.image)
-    await interaction.response.send_message(embed=embed)
-  else:
-    await interaction.response.send_message(f'Search something else...')
-
 
 
 
