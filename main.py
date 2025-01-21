@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord import app_commands
 # to install dotenv library: <pip install python-dotenv>
 from dotenv import load_dotenv
+import json
 import os
 import random
 import pyquotegen
@@ -16,7 +17,7 @@ import requests
 # ====================================== DISCORD BOT INIT ======================================= #
 # ============================================================================================== #
 
-# load and access the discord token
+# load and access the discord token, guild id and jikan url
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 guildId = discord.Object(id=os.getenv("GUILD_ID"))
@@ -256,6 +257,36 @@ async def simpleSlotMachine(interaction: discord.Integration, bet: int):
 # ============================================================================================== #
 # ======================================== TEST COMMANDS ======================================= #
 # ============================================================================================== #
+
+DATA_FILE = "data.json"
+
+def load_data(key, default_value=None):
+  if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r") as f:
+      return json.load(f).get(key, default_value)
+  return default_value
+
+def save_data(key, value):
+  data = {}
+  if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "r") as f:
+      data = json.load(f)
+  data[key] = value
+  with open(DATA_FILE, "w") as f:
+    json.dump(data, f, indent=2)
+
+counter = load_data("counter", 0)
+
+@client.tree.command(name="click-button", description="Test an incremental button.", guild=guildId)
+async def incrementButton(interaction: discord.Integration):
+  global counter
+  counter += 1
+  save_data("counter", counter)
+  await interaction.response.send_message(f"The counter is now: {counter}!")
+
+
+
+
 
 
 
