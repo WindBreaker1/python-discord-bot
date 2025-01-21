@@ -11,7 +11,6 @@ import random
 import pyquotegen
 import requests
 # imports from other files
-from codex import creatures
 
 # ============================================================================================== #
 # ====================================== DISCORD BOT INIT ======================================= #
@@ -162,10 +161,29 @@ def get_random_anime():
 async def randomAnime(interaction: discord.Integration):
   await interaction.response.send_message(get_random_anime())
 
+# ====================================== GET A RANDOM ANIME ====================================== #
+
+def get_random_manga():
+  manga_id = random.randint(1, 2000)
+
+  response = requests.get(f"{jikanUrl}/manga/{manga_id}")
+
+  if response.status_code == 200:
+    data = response.json()
+    title = data["data"]["title"]
+    url = data["data"]["url"] 
+    return (f"Random Manga: {title}\nMore info: {url}")
+  else:
+    return (f"Failed to fetch anime with ID {manga_id}. Try again.")
+ 
+@client.tree.command(name="random-manga", description="Get a random manga recommendation.", guild=guildId)
+async def randomManga(interaction: discord.Integration):
+  await interaction.response.send_message(get_random_manga())
+
 # ====================================== CUSTOM EMBED ====================================== #
 
 @client.tree.command(name="custom-embed", description="Make your own custom embed!", guild=guildId)
-async def embedDemo(interaction: discord.Integration, 
+async def customEmbed(interaction: discord.Integration, 
   title: str = None,
   title_url: str = None,
   description: str = None,
@@ -197,28 +215,10 @@ async def embedDemo(interaction: discord.Integration,
 
   await interaction.response.send_message(embed=embed)
 
+# ================================== SIMPLE SLOT MACHINE ===================================== #
 
-
-
-
-
-
-
-
-
-# ============================================================================================== #
-# ======================================== TEST COMMANDS ======================================= #
-# ============================================================================================== #
-
-
-
-
-
-
-
-# slot machine
 @client.tree.command(name="slot-machine", description="I'm a slot machine.", guild=guildId)
-async def drunkPrinter(interaction: discord.Integration, bet: int):
+async def simpleSlotMachine(interaction: discord.Integration, bet: int):
   rows = 3
   cols = 3
   emojis = ['❌', '✅']
@@ -253,25 +253,9 @@ async def drunkPrinter(interaction: discord.Integration, bet: int):
   else:
     await interaction.response.send_message(f'{full_display}\n\nYou won nothing...')
 
-
-
-
-# monster codex
-
-@client.tree.command(name="codex_creature", description="Search the creature codex.", guild=guildId)
-async def codexCreatures(interaction: discord.Integration, query: str):
-  matching_creature = next((creature for creature in creatures if creature.name.lower() == query.lower()), None)
-  if matching_creature:
-    embed = discord.Embed(
-      title = matching_creature.name,
-      description = matching_creature.description,
-      color=discord.Color.green()
-    )
-    embed.set_image(url = matching_creature.image)
-    await interaction.response.send_message(embed=embed)
-  else:
-    await interaction.response.send_message(f'Search something else...')
-
+# ============================================================================================== #
+# ======================================== TEST COMMANDS ======================================= #
+# ============================================================================================== #
 
 
 
@@ -304,6 +288,40 @@ async def drinkBeer(interaction: discord.Integration):
 
 
 
+
+
+
+
+# monster codex
+
+# the codex
+class Creature:
+  def __init__(self, name, description, image):
+    self.name = name
+    self.description = description
+    self.image = image
+
+dragon = Creature("Dragon", "Mystical lizard that breathes fire.", "https://i.pinimg.com/736x/3b/98/1d/3b981d0d8f5b7d92cdee2e668319a1c3.jpg")
+
+rat = Creature("Rat", "A fucking rat", "https://i.pinimg.com/736x/dd/85/3b/dd853b5c3a874aed38b9a04c712809d1.jpg")
+
+horror = Creature("Two-Legged Horror", "Unkown creature residing in the void. Will stop at nothing to consume you.", "https://i.pinimg.com/236x/ed/e2/79/ede279c0ce89f1bee52aafcaac28de83.jpg")
+
+creatures = [dragon, rat, horror]
+
+@client.tree.command(name="codex_creature", description="Search the creature codex.", guild=guildId)
+async def codexCreatures(interaction: discord.Integration, query: str):
+  matching_creature = next((creature for creature in creatures if creature.name.lower() == query.lower()), None)
+  if matching_creature:
+    embed = discord.Embed(
+      title = matching_creature.name,
+      description = matching_creature.description,
+      color=discord.Color.green()
+    )
+    embed.set_image(url = matching_creature.image)
+    await interaction.response.send_message(embed=embed)
+  else:
+    await interaction.response.send_message(f'Search something else...')
 
 
 

@@ -16,7 +16,9 @@
 
 ![dice-test](./images/dice-test.png)
 
-## Events
+## Info
+
+If your app scales past 100 servers you need to verify the app.
 
 Every event type for the discord bot:
 
@@ -32,20 +34,22 @@ Every event type for the discord bot:
 - on_reaction_add(reaction, user)
 - on_reaction_remove(reaction, user)
 
-# To-Do
+# Things to add
 
-- [ ] Slot machine.
 - [ ] Beer drink minigame.
 - [ ] Fishing minigame.
-- [ ] Check every command to see if it looks good.
-- [ ] Random manga recommendation.
+- [x] Random manga recommendation.
 - [ ] Allow slash commands on every server.
+- [ ] Make the bot run continuously.
 - [ ] Make a page on your website for the discord bot and link in the projects page.
+- [ ] RPG game.
+- [ ] More complex slot machine.
 
 ## Resources
 
 - Video I used for learning: [link](https://youtu.be/CHbN_gB30Tw?si=SAXOYRxdHmqhPtRj);
-- GitHub repo I used to find cool API's" [link](https://github.com/public-apis/public-apis?tab=readme-ov-file)
-- Discord API: [DiscordPy](https://github.com/Rapptz/discord.py)
-- Quotes Generator API: [pyquotegen](https://github.com/Armanidrisi/pyquotegen)
-- Anime API: [Jikan](https://jikan.moe/)
+- To easilt work with your Discord Bot go to the official [developer site](https://discord.com/developers/applications);
+- GitHub repo I used to find cool API's: [link](https://github.com/public-apis/public-apis?tab=readme-ov-file);
+- Discord API: [DiscordPy](https://github.com/Rapptz/discord.py);
+- Quotes Generator API: [pyquotegen](https://github.com/Armanidrisi/pyquotegen);
+- Anime & Manga API: [Jikan](https://jikan.moe/);
