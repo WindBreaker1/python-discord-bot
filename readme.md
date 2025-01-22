@@ -47,8 +47,8 @@ Every event type for the discord bot:
 
 ## Bugs
 
-- [ ] Random Anime Character: about max character limit 1024
-- [ ] Random Anime Character: other bugs
+- [x] Random Anime Character: about max character limit 1024
+- [x] Random Anime Character: other bugs
 
 ## Resources
 
