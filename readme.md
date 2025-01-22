@@ -34,16 +34,21 @@ Every event type for the discord bot:
 - on_reaction_add(reaction, user)
 - on_reaction_remove(reaction, user)
 
-# Things to add
+## Things to add
 
-- [ ] Beer drink minigame.
-- [ ] Fishing minigame.
 - [x] Random manga recommendation.
 - [ ] Allow slash commands on every server.
 - [ ] Make the bot run continuously.
 - [ ] Make a page on your website for the discord bot and link in the projects page.
+- [ ] Beer drink minigame.
+- [ ] Fishing minigame.
 - [ ] RPG game.
 - [ ] More complex slot machine.
+
+## Bugs
+
+- [ ] Random Anime Character: about max character limit 1024
+- [ ] Random Anime Character: other bugs
 
 ## Resources
 

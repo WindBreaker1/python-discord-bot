@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord import app_commands
 # to install dotenv library: <pip install python-dotenv>
 from dotenv import load_dotenv
+from guild_config import TEST_GUILD_ID
 import json
 import os
 import random
@@ -20,8 +21,12 @@ import requests
 # load and access the discord token, guild id and jikan url
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
-guildId = discord.Object(id=os.getenv("GUILD_ID"))
 jikanUrl = os.getenv("JIKAN_URL")
+GUILD_RAW_ID = os.getenv("GUILD_ID")
+if GUILD_RAW_ID:
+  guildId = discord.Object(id=GUILD_RAW_ID)
+else:
+  guildId = None
 
 # the main class that adds the bot's functionality
 class Client(commands.Bot):
@@ -181,10 +186,10 @@ def get_random_anime():
 async def randomAnime(interaction: discord.Integration):
   await interaction.response.send_message(get_random_anime())
 
-# ====================================== GET A RANDOM ANIME ====================================== #
+# ====================================== GET A RANDOM MANGA ====================================== #
 
 def get_random_manga():
-  manga_id = random.randint(1, 2000)
+  manga_id = random.randint(1, 20000)
 
   response = requests.get(f"{jikanUrl}/manga/{manga_id}")
 
@@ -199,6 +204,65 @@ def get_random_manga():
 @client.tree.command(name="random-manga", description="Get a random manga recommendation.", guild=guildId)
 async def randomManga(interaction: discord.Integration):
   await interaction.response.send_message(get_random_manga())
+
+# ================================ GET A RANDOM ANIME CHARACTER ====================================== #
+
+def get_random_anime_character():
+  character_id = random.randint(1, 20000)
+
+  response = requests.get(f"{jikanUrl}/characters/{character_id}")
+
+  max_retries = 10
+  retries = 0
+
+  compatibility = random.randint(1, 100)
+  compatibilityMessage = ''
+
+  while retries < max_retries:
+    if response.status_code == 200:
+      data = response.json()
+      name = data["data"]["name"]
+      about = data["data"]["about"]
+      url = data["data"]["url"]
+      images = data["data"]["images"]["jpg"]["image_url"]
+
+      if len(about) >= 1024:
+        about = "The about section is too large, click the link below to learn more about the character!"
+
+      if compatibility <= 25:
+        compatibilityMessage = f"💔 You are {compatibility}% compatible... Just give up... 😭"
+      elif 25 < compatibility <= 50:
+        compatibilityMessage = f"💓 You are {compatibility}% compatible.. Maybe start looksmaxxing? 🤕"
+      elif 50 < compatibility <= 75:
+        compatibilityMessage = f"💖 You are {compatibility}% compatible. You might have a chance! 🙏"
+      elif 75 < compatibility <= 90:
+        compatibilityMessage = f"💞 You are {compatibility}% compatible! You're irresistible! 🥵"
+      elif 90 < compatibility <= 100:
+        compatibilityMessage = f"💘 You are {compatibility}% compatible!!! I present to you your future waifu/husbando. 🫡 "
+      
+      embed = discord.Embed(type='rich')
+      embed.title = f"🥰 Your random waifu/husbando is... {name}"
+      embed.add_field(name="About", value=about, inline=False)
+      embed.add_field(name="Compatability %", value=compatibilityMessage, inline=False)
+      embed.add_field(name="More Info", value=url, inline=False)
+      embed.set_image(url=images)
+      embed.color = discord.Color.random()
+
+      return embed
+    
+    retries += 1
+    
+  embed = discord.Embed(
+    title="Failed to fetch character 😢",
+    description=f"Tried {max_retries} times but couldn't find a valid character. Try again.",
+    color=discord.Color.red()
+  )
+  return embed
+
+@client.tree.command(name="find-your-waifu", description="Find your perfect waifu/husbando!", guild=guildId)
+async def randomCharacter(interaction: discord.Integration):
+  embed = get_random_anime_character()
+  await interaction.response.send_message(embed=embed)
 
 # ====================================== CUSTOM EMBED ====================================== #
 
@@ -287,19 +351,9 @@ async def incrementCounter(interaction: discord.Integration):
 # ======================================== TEST COMMANDS ======================================= #
 # ============================================================================================== #
 
-
-
-
-
-
-
-
-
-
-
 # buttons
-@client.tree.command(name="button", description="Button", guild=guildId)
-async def button(interaction: discord.Integration):
+@client.tree.command(name="feet-pics", description="Free fit pics!", guild=guildId)
+async def freeFeetPics(interaction: discord.Integration):
   view = discord.ui.View()
   button = discord.ui.Button(label = "👣 Free Fit Pics!", url="https://i.pinimg.com/236x/24/97/c2/2497c290c31e86f3adc15c670480b6c4.jpg")
   view.add_item(button)
@@ -307,22 +361,6 @@ async def button(interaction: discord.Integration):
   await interaction.response.send_message(view=view)
 
 
-# how many beers can you drink before you die?
-@client.tree.command(name="drink-beer", description="See how long you can last!", guild=guildId)
-async def drinkBeer(interaction: discord.Integration):
-  finalAmount = 0
-
-  view = discord.ui.View()
-  button = discord.ui.Button(label = "🍺 Drink!", custom_id="drink_button")
-  view.add_item(button)
-  if interaction.data.get("custom_id") == "drink_button":
-    finalAmount += 1
-    await interaction.response.edit_message(content=f"The counter is now: {finalAmount}!")
-
-  await interaction.response.send_message(view=view)
-
-  if finalAmount >= 5:
-    await interaction.response.send_message(f'🍺 You drank {finalAmount} beers!')
 
 
 
