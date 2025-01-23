@@ -34,10 +34,12 @@ Every event type for the discord bot:
 - on_reaction_add(reaction, user)
 - on_reaction_remove(reaction, user)
 
+You can use `pip freeze > requirements.txt` to easily add all dependencies in a `requirements.text` file!
+
 ## Things to add
 
 - [x] Random manga recommendation.
-- [ ] Allow slash commands on every server.
+- [x] Allow slash commands on every server.
 - [ ] Make the bot run continuously.
 - [ ] Make a page on your website for the discord bot and link in the projects page.
 - [ ] Beer drink minigame.
