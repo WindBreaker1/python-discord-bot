@@ -23,8 +23,8 @@ load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 jikanUrl = os.getenv("JIKAN_URL")
 GUILD_RAW_ID = os.getenv("GUILD_ID")
-if GUILD_RAW_ID:
-  guildId = discord.Object(id=GUILD_RAW_ID)
+if TEST_GUILD_ID:
+  guildId = discord.Object(id=TEST_GUILD_ID)
 else:
   guildId = None
 
@@ -34,9 +34,13 @@ class Client(commands.Bot):
   async def on_ready(self):
     print(f'Logged on as {self.user}!')
     try:
-      guild = discord.Object(id=1206133484423483453)
-      synced = await self.tree.sync(guild=guild)
-      print(f'Synced {len(synced)} commands to guild {guild.id}.')
+      if TEST_GUILD_ID:
+        guild = discord.Object(id=TEST_GUILD_ID)
+        synced = await self.tree.sync(guild=guild)
+        print(f'Synced {len(synced)} commands to guild {guild.id}.')
+      else:
+        synced = await client.tree.sync()
+        print(f'Synced {len(synced)} global commands.')
     except Exception as e:
       print(f'Error syncing commands: {e}')
 
@@ -172,16 +176,21 @@ async def askEightBall(interaction: discord.Integration, question: str):
 def get_random_anime():
   anime_id = random.randint(1, 20000)
 
+  max_retries = 50
+  retries = 0
+
   response = requests.get(f"{jikanUrl}/anime/{anime_id}")
 
-  if response.status_code == 200:
-    data = response.json()
-    title = data["data"]["title"]
-    url = data["data"]["url"] 
-    return (f"Random Anime: {title}\nMore info: {url}")
-  else:
-    return (f"Failed to fetch anime with ID {anime_id}. Try again.")
+  while retries < max_retries:
+    if response.status_code == 200:
+      data = response.json()
+      title = data["data"]["title"]
+      url = data["data"]["url"] 
+      return (f"Random Anime: {title}\nMore info: {url}")
+    retries += 1
 
+  return (f"Tried {max_retries} times but couldn't find an anime. Try again.")
+    
 @client.tree.command(name="random-anime", description="Get a random anime recommendation.", guild=guildId)
 async def randomAnime(interaction: discord.Integration):
   await interaction.response.send_message(get_random_anime())
@@ -191,15 +200,21 @@ async def randomAnime(interaction: discord.Integration):
 def get_random_manga():
   manga_id = random.randint(1, 20000)
 
+  max_retries = 50
+  retries = 0
+
   response = requests.get(f"{jikanUrl}/manga/{manga_id}")
 
-  if response.status_code == 200:
-    data = response.json()
-    title = data["data"]["title"]
-    url = data["data"]["url"] 
-    return (f"Random Manga: {title}\nMore info: {url}")
-  else:
-    return (f"Failed to fetch anime with ID {manga_id}. Try again.")
+  while retries < max_retries:
+    if response.status_code == 200:
+      data = response.json()
+      title = data["data"]["title"]
+      url = data["data"]["url"] 
+      return (f"Random Manga: {title}\nMore info: {url}")
+    
+    retries += 1
+
+  return (f"Tried {max_retries} times but couldn't find a manga. Try again.")
  
 @client.tree.command(name="random-manga", description="Get a random manga recommendation.", guild=guildId)
 async def randomManga(interaction: discord.Integration):
@@ -212,7 +227,7 @@ def get_random_anime_character():
 
   response = requests.get(f"{jikanUrl}/characters/{character_id}")
 
-  max_retries = 10
+  max_retries = 50
   retries = 0
 
   compatibility = random.randint(1, 100)
@@ -226,8 +241,8 @@ def get_random_anime_character():
       url = data["data"]["url"]
       images = data["data"]["images"]["jpg"]["image_url"]
 
-      if len(about) >= 1024:
-        about = "The about section is too large, click the link below to learn more about the character!"
+      if not about or len(about) >= 1024:
+        about = "The about section is too large, or the character doesn't have one. Click the link below to learn more about the character!"
 
       if compatibility <= 25:
         compatibilityMessage = f"💔 You are {compatibility}% compatible... Just give up... 😭"
